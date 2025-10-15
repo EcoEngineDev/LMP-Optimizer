@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LBO Metal Purchasing Calculator</title>
+    <link rel="icon" type="image/png" href="media/logo.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(255,255,255,0.1);
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: #2a2a2a;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #555;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-group input::placeholder {
+            color: #888;
+        }
+
+        .parts-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 10px;
+            background: #1a1a1a;
+        }
+
+        .part-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #444;
+            color: #ffffff;
+        }
+
+        .part-item:last-child {
+            border-bottom: none;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-calculate {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .results-section {
+            background: #2a2a2a;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+        .result-card {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(255,255,255,0.1);
+            border: 1px solid #444;
+        }
+
+        .result-title {
+            font-size: 1.2em;
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .cost-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            color: #ffffff;
+        }
+
+        .total-cost {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #d5f4e6 0%, #a8e6cf 100%);
+            border-radius: 8px;
+        }
+
+        .excess-info {
+            background: #2d2d1a;
+            border: 1px solid #4d4d2a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            color: #ffffff;
+        }
+
+        .cutting-piece {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .piece-header {
+            font-size: 1.1em;
+            color: #ffffff;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #444;
+        }
+
+        .piece-visual {
+            margin: 15px 0;
+        }
+
+        .visual-bar {
+            display: flex;
+            height: 40px;
+            border: 2px solid #555;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #2a2a2a;
+        }
+
+        .visual-bar.unused {
+            background: #444;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-weight: 600;
+        }
+
+        .cut-segment {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            border-right: 1px solid #2980b9;
+            min-width: 60px;
+        }
+
+        .cut-segment:last-child {
+            border-right: none;
+        }
+
+        .waste-segment {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .piece-details {
+            margin-top: 10px;
+        }
+
+        .cuts-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .cut-item {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .no-cuts {
+            color: #888;
+            font-style: italic;
+        }
+
+        .waste-info {
+            color: #e74c3c;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(255,255,255,0.1);
+            border: 1px solid #444;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        .logo-corner {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            z-index: 1000;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .logo-corner:hover {
+            opacity: 1;
+        }
+
+        .logo-corner img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LBO Metal Purchasing Calculator</h1>
+            <p>Optimize your metal purchasing decisions to minimize costs and waste</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">Parts Required</h2>
+                <div class="form-group">
+                    <label for="partLength">Part Length (feet):</label>
+                    <input type="number" id="partLength" step="0.1" min="0" placeholder="Enter length in feet">
+                </div>
+                <div class="form-group">
+                    <label for="partQuantity">Quantity:</label>
+                    <input type="number" id="partQuantity" min="1" placeholder="Enter quantity">
+                </div>
+                <button class="btn" onclick="addPart()">Add Part</button>
+                
+                <div class="parts-list" id="partsList">
+                    <div class="empty-state">No parts added yet</div>
+                </div>
+
+                <h2 class="section-title" style="margin-top: 30px;">Purchasing Options</h2>
+                <div class="form-group">
+                    <label for="optionLength">Length (feet):</label>
+                    <input type="number" id="optionLength" step="0.1" min="0" placeholder="Enter length in feet">
+                </div>
+                <div class="form-group">
+                    <label for="optionPrice">Price ($):</label>
+                    <input type="number" id="optionPrice" step="0.01" min="0" placeholder="Enter price">
+                </div>
+                <button class="btn" onclick="addOption()">Add Option</button>
+                
+                <div class="parts-list" id="optionsList">
+                    <div class="empty-state">No purchasing options added yet</div>
+                </div>
+
+                <button class="btn btn-calculate" onclick="calculateOptimal()">Calculate Optimal Purchase</button>
+            </div>
+
+            <div class="results-section">
+                <h2 class="section-title">Results</h2>
+                <div id="results">
+                    <div class="empty-state">
+                        Add parts and purchasing options, then click "Calculate Optimal Purchase" to see results
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="logo-corner">
+        <img src="media/logo.png" alt="Logo">
+    </div>
+
+    <script>
+        let parts = [];
+        let options = [];
+
+        function addPart() {
+            const length = parseFloat(document.getElementById('partLength').value);
+            const quantity = parseInt(document.getElementById('partQuantity').value);
+            
+            if (length > 0 && quantity > 0) {
+                parts.push({ length, quantity });
+                updatePartsList();
+                document.getElementById('partLength').value = '';
+                document.getElementById('partQuantity').value = '';
+            } else {
+                alert('Please enter valid length and quantity');
+            }
+        }
+
+        function addOption() {
+            const length = parseFloat(document.getElementById('optionLength').value);
+            const price = parseFloat(document.getElementById('optionPrice').value);
+            
+            if (length > 0 && price >= 0) {
+                options.push({ length, price });
+                updateOptionsList();
+                document.getElementById('optionLength').value = '';
+                document.getElementById('optionPrice').value = '';
+            } else {
+                alert('Please enter valid length and price');
+            }
+        }
+
+        function removePart(index) {
+            parts.splice(index, 1);
+            updatePartsList();
+        }
+
+        function removeOption(index) {
+            options.splice(index, 1);
+            updateOptionsList();
+        }
+
+        function updatePartsList() {
+            const list = document.getElementById('partsList');
+            if (parts.length === 0) {
+                list.innerHTML = '<div class="empty-state">No parts added yet</div>';
+                return;
+            }
+            
+            list.innerHTML = parts.map((part, index) => `
+                <div class="part-item">
+                    <span>${part.length} ft × ${part.quantity} = ${part.length * part.quantity} ft total</span>
+                    <button class="remove-btn" onclick="removePart(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function updateOptionsList() {
+            const list = document.getElementById('optionsList');
+            if (options.length === 0) {
+                list.innerHTML = '<div class="empty-state">No purchasing options added yet</div>';
+                return;
+            }
+            
+            list.innerHTML = options.map((option, index) => `
+                <div class="part-item">
+                    <span>${option.length} ft for $${option.price.toFixed(2)} ($${(option.price/option.length).toFixed(2)}/ft)</span>
+                    <button class="remove-btn" onclick="removeOption(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function calculateOptimal() {
+            if (parts.length === 0 || options.length === 0) {
+                alert('Please add at least one part and one purchasing option');
+                return;
+            }
+
+            const totalNeeded = parts.reduce((sum, part) => sum + (part.length * part.quantity), 0);
+            const result = findOptimalCombination(totalNeeded, options);
+            
+            displayResults(result, totalNeeded);
+        }
+
+        function findOptimalCombination(totalNeeded, options) {
+            const sortedOptions = [...options].sort((a, b) => (a.price / a.length) - (b.price / b.length));
+            let bestSolution = null;
+            let bestCost = Infinity;
+            
+            function backtrack(currentCombination, remainingNeeded, currentCost, optionIndex) {
+                if (remainingNeeded <= 0) {
+                    if (currentCost < bestCost) {
+                        bestCost = currentCost;
+                        bestSolution = [...currentCombination];
+                    }
+                    return;
+                }
+                
+                if (optionIndex >= sortedOptions.length) return;
+                
+                const option = sortedOptions[optionIndex];
+                const maxQuantity = Math.ceil(remainingNeeded / option.length) + 2;
+                
+                for (let qty = 0; qty <= maxQuantity; qty++) {
+                    const newRemaining = remainingNeeded - (qty * option.length);
+                    const newCost = currentCost + (qty * option.price);
+                    
+                    if (newCost < bestCost) {
+                        if (qty > 0) {
+                            currentCombination.push({ ...option, quantity: qty });
+                        }
+                        backtrack(currentCombination, newRemaining, newCost, optionIndex + 1);
+                        if (qty > 0) {
+                            currentCombination.pop();
+                        }
+                    }
+                }
+            }
+            
+            backtrack([], totalNeeded, 0, 0);
+            
+            return {
+                combination: bestSolution || [],
+                totalCost: bestCost,
+                totalPurchased: bestSolution ? bestSolution.reduce((sum, item) => sum + (item.length * item.quantity), 0) : 0
+            };
+        }
+
+        function createCuttingPlan(purchasedItems, requiredParts) {
+            const cuttingPlan = [];
+            const partsToCut = [...requiredParts];
+            partsToCut.sort((a, b) => b.length - a.length);
+            
+            for (const item of purchasedItems) {
+                for (let i = 0; i < item.quantity; i++) {
+                    const piece = {
+                        length: item.length,
+                        price: item.price,
+                        cuts: [],
+                        remaining: item.length,
+                        waste: 0
+                    };
+                    
+                    let pieceIndex = 0;
+                    while (pieceIndex < partsToCut.length && piece.remaining > 0) {
+                        const part = partsToCut[pieceIndex];
+                        
+                        if (part.quantity > 0 && part.length <= piece.remaining) {
+                            const maxFits = Math.min(part.quantity, Math.floor(piece.remaining / part.length));
+                            
+                            if (maxFits > 0) {
+                                piece.cuts.push({
+                                    length: part.length,
+                                    quantity: maxFits,
+                                    description: `${part.length} ft × ${maxFits}`
+                                });
+                                
+                                piece.remaining -= part.length * maxFits;
+                                partsToCut[pieceIndex].quantity -= maxFits;
+                                
+                                if (partsToCut[pieceIndex].quantity === 0) {
+                                    partsToCut.splice(pieceIndex, 1);
+                                } else {
+                                    pieceIndex++;
+                                }
+                            } else {
+                                pieceIndex++;
+                            }
+                        } else {
+                            pieceIndex++;
+                        }
+                    }
+                    
+                    piece.waste = piece.remaining;
+                    cuttingPlan.push(piece);
+                }
+            }
+            
+            return cuttingPlan;
+        }
+
+        function displayResults(result, totalNeeded) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (!result.combination || result.combination.length === 0) {
+                resultsDiv.innerHTML = '<div class="empty-state">No valid solution found</div>';
+                return;
+            }
+            
+            const excess = result.totalPurchased - totalNeeded;
+            const excessPercentage = ((excess / totalNeeded) * 100).toFixed(1);
+            const cuttingPlan = createCuttingPlan(result.combination, parts);
+            
+            resultsDiv.innerHTML = `
+                <div class="result-card">
+                    <div class="result-title">Optimal Purchase Plan</div>
+                    <div class="cost-breakdown">
+                        ${result.combination.map(item => `
+                            <div class="cost-item">
+                                <span>${item.length} ft × ${item.quantity}</span>
+                                <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="total-cost">Total Cost: $${result.totalCost.toFixed(2)}</div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-title">Cutting Plan</div>
+                    ${cuttingPlan.map((piece, index) => `
+                        <div class="cutting-piece">
+                            <div class="piece-header">
+                                <strong>Piece ${index + 1}:</strong> ${piece.length} ft ($${piece.price.toFixed(2)})
+                            </div>
+                            <div class="piece-visual">
+                                ${createPieceVisual(piece)}
+                            </div>
+                            <div class="piece-details">
+                                ${piece.cuts.length > 0 ? `
+                                    <div class="cuts-list">
+                                        ${piece.cuts.map(cut => `
+                                            <span class="cut-item">${cut.description}</span>
+                                        `).join('')}
+                                    </div>
+                                ` : '<span class="no-cuts">No cuts - use as scrap</span>'}
+                                ${piece.waste > 0 ? `<div class="waste-info">Waste: ${piece.waste.toFixed(1)} ft</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-title">Material Summary</div>
+                    <div class="cost-breakdown">
+                        <div class="cost-item">
+                            <span>Total Needed:</span>
+                            <span>${totalNeeded.toFixed(1)} ft</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Total Purchased:</span>
+                            <span>${result.totalPurchased.toFixed(1)} ft</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Excess Material:</span>
+                            <span>${excess.toFixed(1)} ft</span>
+                        </div>
+                    </div>
+                    <div class="excess-info">
+                        <strong>Excess: ${excess.toFixed(1)} ft (${excessPercentage}%)</strong><br>
+                        This excess can be used for future projects or sold as scrap.
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="resultsChart" width="400" height="200"></canvas>
+                </div>
+            `;
+            
+            createChart(result, totalNeeded, excess);
+        }
+
+        function createPieceVisual(piece) {
+            if (piece.cuts.length === 0) {
+                return `<div class="visual-bar unused">${piece.length} ft (unused)</div>`;
+            }
+            
+            let visual = '<div class="visual-bar">';
+            let currentPos = 0;
+            
+            piece.cuts.forEach(cut => {
+                const width = (cut.length * cut.quantity / piece.length) * 100;
+                visual += `<div class="cut-segment" style="width: ${width}%">${cut.description}</div>`;
+                currentPos += cut.length * cut.quantity;
+            });
+            
+            if (piece.waste > 0) {
+                const wasteWidth = (piece.waste / piece.length) * 100;
+                visual += `<div class="waste-segment" style="width: ${wasteWidth}%">${piece.waste.toFixed(1)} ft waste</div>`;
+            }
+            
+            visual += '</div>';
+            return visual;
+        }
+
+        function createChart(result, totalNeeded, excess) {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Used Material', 'Excess Material'],
+                    datasets: [{
+                        data: [totalNeeded, excess],
+                        backgroundColor: ['#3498db', '#e74c3c'],
+                        borderWidth: 2,
+                        borderColor: '#1a1a1a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Material Usage Breakdown',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            color: '#ffffff'
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
