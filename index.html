@@ -3,49 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LBO Metal Purchasing Calculator</title>
+    <title>Linear Metal Part Optimizer</title>
     <link rel="icon" type="image/png" href="media/logo.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
+        @font-face {
+            font-family: 'Lexend';
+            src: url('https://fonts.googleapis.com/css2?family=Lexend:wght@100;200;300;400;500;600;700;800;900&display=swap');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        body, html, input, button, textarea {
+            font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000000;
+            background: linear-gradient(135deg, #0B0C10 0%, #1a1a1a 50%, #0B0C10 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #ffffff;
+            overflow-x: hidden;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: #1a1a1a;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(255,255,255,0.1);
+            background: linear-gradient(135deg, #334255 0%, #1a1a1a 100%);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 217, 255, 0.15);
             overflow: hidden;
-            border: 1px solid #333;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            backdrop-filter: blur(10px);
         }
 
         .header {
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            background: linear-gradient(135deg, #0B0C10 0%, #334255 100%);
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,217,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+            z-index: 0;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d9ff 0%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
         }
 
         .header p {
-            font-size: 1.1em;
+            font-size: 1.2em;
             opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            color: #e0e0e0;
         }
 
         .main-content {
@@ -56,18 +98,22 @@
         }
 
         .input-section {
-            background: #2a2a2a;
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid #444;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
         }
 
         .section-title {
-            font-size: 1.4em;
+            font-size: 1.6em;
             color: #ffffff;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #00d9ff;
+            padding-bottom: 12px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
         }
 
         .form-group {
@@ -83,22 +129,80 @@
 
         .form-group input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #555;
-            border-radius: 8px;
+            padding: 15px;
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            border-radius: 12px;
             font-size: 16px;
-            transition: border-color 0.3s;
-            background: #1a1a1a;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
             color: #ffffff;
+            font-family: 'Lexend', sans-serif;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #3498db;
+            border-color: #00d9ff;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         .form-group input::placeholder {
             color: #888;
+            font-style: italic;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: #ffffff;
+            font-family: 'Lexend', sans-serif;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #00d9ff;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .form-group select option {
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 10px;
+        }
+
+        .input-with-unit {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-with-unit input {
+            flex: 1;
+        }
+
+        .input-with-unit select {
+            width: 120px;
+            flex-shrink: 0;
+        }
+
+        .warning-card {
+            border: 2px solid #ff6b6b !important;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(238, 90, 82, 0.1) 100%) !important;
+            animation: pulse-warning 2s infinite;
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% { box-shadow: 0 8px 32px rgba(255, 107, 107, 0.1); }
+            50% { box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3); }
         }
 
         .parts-list {
@@ -138,44 +242,77 @@
         }
 
         .btn {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 15px 30px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: transform 0.2s;
-            margin: 5px;
+            transition: all 0.3s ease;
+            margin: 8px;
+            font-family: 'Lexend', sans-serif;
+            box-shadow: 0 4px 15px rgba(0, 217, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 217, 255, 0.4);
         }
 
         .btn-calculate {
-            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             font-size: 18px;
-            margin-top: 20px;
+            margin-top: 25px;
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-calculate:hover {
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
         }
 
         .results-section {
-            background: #2a2a2a;
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid #444;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
         }
 
         .result-card {
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(255,255,255,0.1);
-            border: 1px solid #444;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 217, 255, 0.2);
         }
 
         .result-title {
@@ -202,13 +339,16 @@
         }
 
         .total-cost {
-            font-size: 1.5em;
+            font-size: 1.8em;
             font-weight: bold;
-            color: #27ae60;
+            color: #00ff88;
             text-align: center;
-            padding: 15px;
-            background: linear-gradient(135deg, #d5f4e6 0%, #a8e6cf 100%);
-            border-radius: 8px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 204, 102, 0.1) 100%);
+            border-radius: 12px;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.2);
         }
 
         .excess-info {
@@ -258,15 +398,16 @@
         }
 
         .cut-segment {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
             font-weight: 600;
-            border-right: 1px solid #2980b9;
+            border-right: 1px solid #0099cc;
             min-width: 60px;
+            box-shadow: 0 2px 8px rgba(0, 217, 255, 0.3);
         }
 
         .cut-segment:last-child {
@@ -274,13 +415,14 @@
         }
 
         .waste-segment {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
         }
 
         .piece-details {
@@ -295,12 +437,14 @@
         }
 
         .cut-item {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 4px 8px;
-            border-radius: 4px;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(0, 153, 204, 0.2) 100%);
+            color: #00d9ff;
+            padding: 6px 12px;
+            border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 217, 255, 0.2);
         }
 
         .no-cuts {
@@ -315,12 +459,12 @@
         }
 
         .chart-container {
-            margin-top: 20px;
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(255,255,255,0.1);
-            border: 1px solid #444;
+            margin-top: 25px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.2);
         }
 
         .empty-state {
@@ -338,27 +482,82 @@
             height: 60px;
             z-index: 1000;
             opacity: 0.7;
-            transition: opacity 0.3s;
+            transition: all 0.3s ease;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 217, 255, 0.3);
         }
 
         .logo-corner:hover {
             opacity: 1;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 217, 255, 0.5);
         }
 
         .logo-corner img {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 2px solid #333;
+            border: 2px solid rgba(0, 217, 255, 0.5);
+        }
+
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 217, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00d9ff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Enhanced focus styles */
+        *:focus {
+            outline: 2px solid rgba(0, 217, 255, 0.5);
+            outline-offset: 2px;
         }
 
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
             }
             
             .header h1 {
-                font-size: 2em;
+                font-size: 2.2em;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .input-section, .results-section {
+                padding: 20px;
+            }
+
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .input-with-unit {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .input-with-unit select {
+                width: 100%;
             }
         }
     </style>
@@ -366,16 +565,26 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>LBO Metal Purchasing Calculator</h1>
-            <p>Optimize your metal purchasing decisions to minimize costs and waste</p>
+            <h1>Linear Metal Part Optimizer</h1>
+            <p>Optimize your metal purchasing decisions to minimize costs and waste.  (This may have some errors due to it being writting in js)</p>
         </div>
 
         <div class="main-content">
             <div class="input-section">
                 <h2 class="section-title">Parts Required</h2>
                 <div class="form-group">
-                    <label for="partLength">Part Length (feet):</label>
-                    <input type="number" id="partLength" step="0.1" min="0" placeholder="Enter length in feet">
+                    <label for="partLength">Part Length:</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="partLength" step="0.1" min="0" placeholder="Enter length">
+                        <select id="partLengthUnit">
+                            <option value="feet">feet</option>
+                            <option value="inches">inches</option>
+                            <option value="cm">cm</option>
+                            <option value="yards">yards</option>
+                            <option value="meters">meters</option>
+                            <option value="mm">mm</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="partQuantity">Quantity:</label>
@@ -389,8 +598,18 @@
 
                 <h2 class="section-title" style="margin-top: 30px;">Purchasing Options</h2>
                 <div class="form-group">
-                    <label for="optionLength">Length (feet):</label>
-                    <input type="number" id="optionLength" step="0.1" min="0" placeholder="Enter length in feet">
+                    <label for="optionLength">Length:</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="optionLength" step="0.1" min="0" placeholder="Enter length">
+                        <select id="optionLengthUnit">
+                            <option value="feet">feet</option>
+                            <option value="inches">inches</option>
+                            <option value="cm">cm</option>
+                            <option value="yards">yards</option>
+                            <option value="meters">meters</option>
+                            <option value="mm">mm</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="optionPrice">Price ($):</label>
@@ -402,15 +621,39 @@
                     <div class="empty-state">No purchasing options added yet</div>
                 </div>
 
-                <button class="btn btn-calculate" onclick="calculateOptimal()">Calculate Optimal Purchase</button>
+                <div class="form-group">
+                    <label for="outputUnit">Display Results In:</label>
+                    <select id="outputUnit">
+                        <option value="feet">feet</option>
+                        <option value="inches">inches</option>
+                        <option value="cm">cm</option>
+                        <option value="yards">yards</option>
+                        <option value="meters">meters</option>
+                        <option value="mm">mm</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-calculate" onclick="calculateOptimal()" id="calculateBtn">Calculate Optimal Purchase</button>
             </div>
 
             <div class="results-section">
-                <h2 class="section-title">Results</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 class="section-title" style="margin-bottom: 0;">Results</h2>
+                    <button id="exportPdfBtn" class="btn" onclick="exportToPDF()" style="display: none;">
+                        📄 Export PDF
+                    </button>
+                </div>
                 <div id="results">
                     <div class="empty-state">
                         Add parts and purchasing options, then click "Calculate Optimal Purchase" to see results
                     </div>
+                </div>
+                
+                <!-- Debug Console (only show when URL contains /debug) -->
+                <div id="debugConsoleContainer" style="margin-top: 30px; display: none;">
+                    <h3 class="section-title">Debug Console</h3>
+                    <div id="debugConsole" style="background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 15px; font-family: 'Courier New', monospace; font-size: 12px; color: #00ff00; max-height: 300px; overflow-y: auto; white-space: pre-wrap;"></div>
+                    <button class="btn" onclick="clearDebugConsole()" style="margin-top: 10px;">Clear Console</button>
                 </div>
             </div>
         </div>
@@ -423,13 +666,135 @@
     <script>
         let parts = [];
         let options = [];
+        
+        // Debug console functions
+        function logToDebugConsole(message) {
+            const debugConsole = document.getElementById('debugConsole');
+            if (debugConsole) {
+                const timestamp = new Date().toLocaleTimeString();
+                debugConsole.textContent += `[${timestamp}] ${message}\n`;
+                debugConsole.scrollTop = debugConsole.scrollHeight;
+            }
+        }
+        
+        function clearDebugConsole() {
+            const debugConsole = document.getElementById('debugConsole');
+            if (debugConsole) {
+                debugConsole.textContent = '';
+            }
+        }
+        
+        // Check if debug mode is enabled via URL
+        function isDebugMode() {
+            return window.location.href.includes('/debug') || window.location.search.includes('debug=true');
+        }
+        
+        // Show/hide debug console based on URL
+        function toggleDebugConsole() {
+            const debugContainer = document.getElementById('debugConsoleContainer');
+            if (debugContainer) {
+                debugContainer.style.display = isDebugMode() ? 'block' : 'none';
+            }
+        }
+        
+        // Override console.log to also output to debug console
+        const originalConsoleLog = console.log;
+        const originalConsoleWarn = console.warn;
+        const originalConsoleError = console.error;
+        
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            if (isDebugMode()) {
+                const formattedArgs = args.map(arg => {
+                    if (typeof arg === 'object' && arg !== null) {
+                        return JSON.stringify(arg, null, 2);
+                    }
+                    return String(arg);
+                });
+                logToDebugConsole(formattedArgs.join(' '));
+            }
+        };
+        
+        console.warn = function(...args) {
+            originalConsoleWarn.apply(console, args);
+            if (isDebugMode()) {
+                logToDebugConsole('WARNING: ' + args.join(' '));
+            }
+        };
+        
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            if (isDebugMode()) {
+                logToDebugConsole('ERROR: ' + args.join(' '));
+            }
+        };
+
+        // Unit conversion functions (all to feet)
+        const unitConversions = {
+            'feet': 1,
+            'inches': 1/12,
+            'cm': 1/30.48,
+            'yards': 3,
+            'meters': 3.28084,
+            'mm': 1/304.8
+        };
+
+        function convertToFeet(value, unit) {
+            return value * unitConversions[unit];
+        }
+
+        function convertFromFeet(value, unit) {
+            return value / unitConversions[unit];
+        }
+
+        function getOutputUnit() {
+            return document.getElementById('outputUnit').value;
+        }
+
+        function formatLength(valueInFeet, unit = null) {
+            const outputUnit = unit || getOutputUnit();
+            const convertedValue = convertFromFeet(valueInFeet, outputUnit);
+            return `${convertedValue.toFixed(2)} ${outputUnit}`;
+        }
+
+        function getMaxAvailableLength() {
+            if (options.length === 0) return 0;
+            return Math.max(...options.map(option => option.length));
+        }
+
+        function validateParts() {
+            const maxLength = getMaxAvailableLength();
+            const invalidParts = [];
+            const validParts = [];
+            
+            parts.forEach((part, index) => {
+                if (part.length > maxLength) {
+                    invalidParts.push({
+                        ...part,
+                        index,
+                        maxAvailable: maxLength
+                    });
+                } else {
+                    validParts.push(part);
+                }
+            });
+            
+            return { validParts, invalidParts, maxLength };
+        }
 
         function addPart() {
             const length = parseFloat(document.getElementById('partLength').value);
             const quantity = parseInt(document.getElementById('partQuantity').value);
+            const unit = document.getElementById('partLengthUnit').value;
             
             if (length > 0 && quantity > 0) {
-                parts.push({ length, quantity });
+                const lengthInFeet = convertToFeet(length, unit);
+                parts.push({ 
+                    length: lengthInFeet, 
+                    quantity, 
+                    originalLength: length, 
+                    originalUnit: unit 
+                });
                 updatePartsList();
                 document.getElementById('partLength').value = '';
                 document.getElementById('partQuantity').value = '';
@@ -441,9 +806,16 @@
         function addOption() {
             const length = parseFloat(document.getElementById('optionLength').value);
             const price = parseFloat(document.getElementById('optionPrice').value);
+            const unit = document.getElementById('optionLengthUnit').value;
             
             if (length > 0 && price >= 0) {
-                options.push({ length, price });
+                const lengthInFeet = convertToFeet(length, unit);
+                options.push({ 
+                    length: lengthInFeet, 
+                    price, 
+                    originalLength: length, 
+                    originalUnit: unit 
+                });
                 updateOptionsList();
                 document.getElementById('optionLength').value = '';
                 document.getElementById('optionPrice').value = '';
@@ -471,7 +843,7 @@
             
             list.innerHTML = parts.map((part, index) => `
                 <div class="part-item">
-                    <span>${part.length} ft × ${part.quantity} = ${part.length * part.quantity} ft total</span>
+                    <span>${part.originalLength} ${part.originalUnit} × ${part.quantity} = ${(part.originalLength * part.quantity).toFixed(2)} ${part.originalUnit} total</span>
                     <button class="remove-btn" onclick="removePart(${index})">Remove</button>
                 </div>
             `).join('');
@@ -486,122 +858,442 @@
             
             list.innerHTML = options.map((option, index) => `
                 <div class="part-item">
-                    <span>${option.length} ft for $${option.price.toFixed(2)} ($${(option.price/option.length).toFixed(2)}/ft)</span>
+                    <span>${option.originalLength} ${option.originalUnit} for $${option.price.toFixed(2)} ($${(option.price/option.originalLength).toFixed(2)}/${option.originalUnit})</span>
                     <button class="remove-btn" onclick="removeOption(${index})">Remove</button>
                 </div>
             `).join('');
         }
 
         function calculateOptimal() {
+            console.log('=== Starting Optimization ===');
+            
+            // Show progress indicator
+            const calculateBtn = document.getElementById('calculateBtn');
+            const originalText = calculateBtn.innerHTML;
+            calculateBtn.innerHTML = '<span class="loading"></span> Calculating...';
+            calculateBtn.disabled = true;
+            
+            try {
             if (parts.length === 0 || options.length === 0) {
                 alert('Please add at least one part and one purchasing option');
                 return;
             }
 
-            const totalNeeded = parts.reduce((sum, part) => sum + (part.length * part.quantity), 0);
-            const result = findOptimalCombination(totalNeeded, options);
-            
-            displayResults(result, totalNeeded);
+                console.log('Input parts:', parts);
+                console.log('Input options:', options);
+
+                const { validParts, invalidParts, maxLength } = validateParts();
+                console.log('Valid parts:', validParts);
+                console.log('Invalid parts:', invalidParts);
+                console.log('Max available length:', maxLength);
+                
+                if (validParts.length === 0) {
+                    alert('No valid parts found. All parts exceed the maximum available length.');
+                    return;
+                }
+
+                const totalNeeded = validParts.reduce((sum, part) => sum + (part.length * part.quantity), 0);
+                console.log('Total material needed:', totalNeeded, 'feet');
+                
+                const result = findOptimalCombination(totalNeeded, options, validParts);
+                console.log('Optimization result:', result);
+                
+                displayResults(result, totalNeeded, invalidParts, maxLength);
+            } finally {
+                // Reset button
+                calculateBtn.innerHTML = originalText;
+                calculateBtn.disabled = false;
+            }
         }
 
-        function findOptimalCombination(totalNeeded, options) {
+        function findOptimalCombination(totalNeeded, options, requiredParts) {
+            console.log('=== Starting findOptimalCombination ===');
+            console.log('Total needed:', totalNeeded);
+            console.log('Required parts:', requiredParts);
+            
             const sortedOptions = [...options].sort((a, b) => (a.price / a.length) - (b.price / b.length));
+            console.log('Sorted options:', sortedOptions);
+            
             let bestSolution = null;
             let bestCost = Infinity;
             
-            function backtrack(currentCombination, remainingNeeded, currentCost, optionIndex) {
-                if (remainingNeeded <= 0) {
-                    if (currentCost < bestCost) {
-                        bestCost = currentCost;
-                        bestSolution = [...currentCombination];
+            // For large quantities, use a more aggressive safety margin
+            const totalParts = requiredParts.reduce((sum, part) => sum + part.quantity, 0);
+            const safetyMargin = totalParts > 50 ? 1.2 : 1.1; // 20% for large quantities, 10% for smaller
+            const adjustedTotalNeeded = totalNeeded * safetyMargin;
+            
+            // For very large quantities (>100 parts), use smart multi-supplier algorithm
+            if (totalParts > 100) {
+                console.log('Using smart multi-supplier algorithm for large quantity');
+                return findOptimalCombinationGreedy(adjustedTotalNeeded, sortedOptions, requiredParts);
+            }
+            
+            // For medium quantities (20-100 parts), use smart multi-supplier algorithm
+            if (totalParts >= 20) {
+                console.log('Using smart multi-supplier algorithm for medium quantity');
+                return findOptimalCombinationGreedy(adjustedTotalNeeded, sortedOptions, requiredParts);
+            }
+            
+            // For small quantities (<20 parts), also use smart multi-supplier algorithm to ensure feasibility
+            console.log('Using smart multi-supplier algorithm for small quantity to ensure feasibility');
+            return findOptimalCombinationGreedy(adjustedTotalNeeded, sortedOptions, requiredParts);
+        }
+
+        function canMakeAllParts(purchasedItems, requiredParts) {
+            // Create a test cutting plan to verify all parts can be made
+            const testCuttingPlan = createCuttingPlan(purchasedItems, requiredParts);
+            const validation = validateCuttingPlan(testCuttingPlan, requiredParts);
+            return validation.allPartsFulfilled;
+        }
+
+        function findOptimalCombinationEnhanced(totalNeeded, sortedOptions, requiredParts) {
+            console.log('=== Using Enhanced Algorithm ===');
+            console.log('Total needed:', totalNeeded);
+            console.log('Required parts:', requiredParts);
+            
+            const combination = [];
+            let totalCost = 0;
+            
+            // Calculate how many pieces we actually need to make all required parts
+            const totalPartsNeeded = requiredParts.reduce((sum, part) => sum + part.quantity, 0);
+            console.log('Total parts needed:', totalPartsNeeded);
+            
+            // Use the cheapest option and calculate how many pieces we need
+            const cheapestOption = sortedOptions[0];
+            
+            // For simple cases, calculate exactly how many pieces we need
+            const partsPerPiece = Math.floor(cheapestOption.length / requiredParts[0].length);
+            const minPiecesNeeded = Math.ceil(totalPartsNeeded / partsPerPiece);
+            
+            // Check if we can make all parts with exact number of pieces
+            const exactPartsPossible = minPiecesNeeded * partsPerPiece;
+            
+            let totalPiecesNeeded;
+            if (exactPartsPossible >= totalPartsNeeded) {
+                // We can make all parts with exact calculation, no safety needed
+                totalPiecesNeeded = minPiecesNeeded;
+                console.log('Using exact calculation - no safety pieces needed');
+            } else {
+                // Add minimal safety for complex cases
+                const safetyPieces = Math.min(1, Math.ceil(minPiecesNeeded * 0.02)); // Max 1 piece or 2%
+                totalPiecesNeeded = minPiecesNeeded + safetyPieces;
+                console.log('Adding safety pieces for complex case');
+            }
+            
+            console.log('Parts per piece:', partsPerPiece);
+            console.log('Min pieces needed:', minPiecesNeeded);
+            console.log('Exact parts possible:', exactPartsPossible);
+            console.log('Total pieces needed:', totalPiecesNeeded);
+            
+            combination.push({
+                ...cheapestOption,
+                quantity: totalPiecesNeeded
+            });
+            
+            totalCost = totalPiecesNeeded * cheapestOption.price;
+            
+            console.log('Enhanced combination:', combination);
+            console.log('Total cost:', totalCost);
+            
+            return {
+                combination: combination,
+                totalCost: totalCost,
+                totalPurchased: combination.reduce((sum, item) => sum + (item.length * item.quantity), 0)
+            };
+        }
+
+        function findOptimalCombinationGreedy(totalNeeded, sortedOptions, requiredParts) {
+            console.log('=== Using Smart Multi-Supplier Algorithm ===');
+            console.log('Total needed:', totalNeeded);
+            console.log('Required parts:', requiredParts);
+            
+            const combination = [];
+            let totalCost = 0;
+            
+            // Group parts by what material lengths can make them
+            const partsByMaterial = {};
+            
+            for (const option of sortedOptions) {
+                partsByMaterial[option.length] = [];
+                for (const part of requiredParts) {
+                    if (part.length <= option.length) {
+                        partsByMaterial[option.length].push(part);
                     }
-                    return;
+                }
+            }
+            
+            console.log('Parts that can be made by each material length:', partsByMaterial);
+            
+            // Create a working copy of required parts
+            const remainingParts = requiredParts.map(part => ({
+                ...part,
+                remainingQuantity: part.quantity
+            }));
+            
+            // Process each material option, prioritizing parts that can ONLY be made by longer materials
+            for (const option of sortedOptions) {
+                const canMakeParts = partsByMaterial[option.length];
+                if (canMakeParts.length === 0) continue;
+                
+                console.log(`Processing material: ${option.originalLength} ${option.originalUnit}`);
+                
+                // Find parts that can ONLY be made by this material length (or longer)
+                const exclusiveParts = [];
+                const sharedParts = [];
+                
+                for (const part of remainingParts) {
+                    if (part.remainingQuantity > 0 && part.length <= option.length) {
+                        // Check if this part can be made by cheaper materials
+                        const canBeMadeByCheaper = sortedOptions.some(cheaperOption => 
+                            cheaperOption.length < option.length && 
+                            part.length <= cheaperOption.length
+                        );
+                        
+                        if (!canBeMadeByCheaper) {
+                            exclusiveParts.push(part);
+                        } else {
+                            sharedParts.push(part);
+                        }
+                    }
                 }
                 
-                if (optionIndex >= sortedOptions.length) return;
+                console.log(`Exclusive parts (must use this material):`, exclusiveParts);
+                console.log(`Shared parts (can use cheaper materials):`, sharedParts);
                 
-                const option = sortedOptions[optionIndex];
-                const maxQuantity = Math.ceil(remainingNeeded / option.length) + 2;
-                
-                for (let qty = 0; qty <= maxQuantity; qty++) {
-                    const newRemaining = remainingNeeded - (qty * option.length);
-                    const newCost = currentCost + (qty * option.price);
+                // First, handle exclusive parts (must use this material)
+                let piecesForExclusive = 0;
+                if (exclusiveParts.length > 0) {
+                    for (const part of exclusiveParts) {
+                        const partsPerPiece = Math.floor(option.length / part.length);
+                        const piecesNeeded = Math.ceil(part.remainingQuantity / partsPerPiece);
+                        piecesForExclusive = Math.max(piecesForExclusive, piecesNeeded);
+                    }
                     
-                    if (newCost < bestCost) {
-                        if (qty > 0) {
-                            currentCombination.push({ ...option, quantity: qty });
+                    if (piecesForExclusive > 0) {
+                        console.log(`Need ${piecesForExclusive} pieces for exclusive parts`);
+                        
+                        combination.push({
+                            ...option,
+                            quantity: piecesForExclusive
+                        });
+                        
+                        totalCost += piecesForExclusive * option.price;
+                        
+                        // Update remaining quantities for exclusive parts
+                        for (const part of exclusiveParts) {
+                            const partsPerPiece = Math.floor(option.length / part.length);
+                            const totalPartsMade = piecesForExclusive * partsPerPiece;
+                            part.remainingQuantity = Math.max(0, part.remainingQuantity - totalPartsMade);
+                            console.log(`Exclusive part ${part.originalLength} ${part.originalUnit}: made ${totalPartsMade}, remaining ${part.remainingQuantity}`);
                         }
-                        backtrack(currentCombination, newRemaining, newCost, optionIndex + 1);
-                        if (qty > 0) {
-                            currentCombination.pop();
+                    }
+                }
+                
+                // Then, handle shared parts if this is the most cost-effective option
+                if (sharedParts.length > 0) {
+                    const costPerFoot = option.price / option.length;
+                    const isMostCostEffective = sortedOptions.every(otherOption => 
+                        otherOption.length >= option.length || 
+                        (otherOption.price / otherOption.length) >= costPerFoot
+                    );
+                    
+                    if (isMostCostEffective) {
+                        let piecesForShared = 0;
+                        for (const part of sharedParts) {
+                            if (part.remainingQuantity > 0) {
+                                const partsPerPiece = Math.floor(option.length / part.length);
+                                const piecesNeeded = Math.ceil(part.remainingQuantity / partsPerPiece);
+                                piecesForShared = Math.max(piecesForShared, piecesNeeded);
+                            }
+                        }
+                        
+                        if (piecesForShared > 0) {
+                            console.log(`Need ${piecesForShared} additional pieces for shared parts`);
+                            
+                            // Add to existing quantity or create new entry
+                            const existingIndex = combination.findIndex(item => 
+                                item.length === option.length && item.price === option.price
+                            );
+                            
+                            if (existingIndex >= 0) {
+                                combination[existingIndex].quantity += piecesForShared;
+                            } else {
+                                combination.push({
+                                    ...option,
+                                    quantity: piecesForShared
+                                });
+                            }
+                            
+                            totalCost += piecesForShared * option.price;
+                            
+                            // Update remaining quantities for shared parts
+                            for (const part of sharedParts) {
+                                if (part.remainingQuantity > 0) {
+                                    const partsPerPiece = Math.floor(option.length / part.length);
+                                    const totalPartsMade = piecesForShared * partsPerPiece;
+                                    part.remainingQuantity = Math.max(0, part.remainingQuantity - totalPartsMade);
+                                    console.log(`Shared part ${part.originalLength} ${part.originalUnit}: made ${totalPartsMade}, remaining ${part.remainingQuantity}`);
+                                }
+                            }
                         }
                     }
                 }
             }
             
-            backtrack([], totalNeeded, 0, 0);
+            console.log('Smart combination:', combination);
+            console.log('Total cost:', totalCost);
             
             return {
-                combination: bestSolution || [],
-                totalCost: bestCost,
-                totalPurchased: bestSolution ? bestSolution.reduce((sum, item) => sum + (item.length * item.quantity), 0) : 0
+                combination: combination,
+                totalCost: totalCost,
+                totalPurchased: combination.reduce((sum, item) => sum + (item.length * item.quantity), 0)
             };
         }
 
+
         function createCuttingPlan(purchasedItems, requiredParts) {
-            const cuttingPlan = [];
-            const partsToCut = [...requiredParts];
-            partsToCut.sort((a, b) => b.length - a.length);
+            console.log('=== Creating Cutting Plan ===');
+            console.log('Purchased items:', purchasedItems);
+            console.log('Required parts:', requiredParts);
             
+            const cuttingPlan = [];
+            // Create a working copy of required parts with quantities
+            const partsToCut = requiredParts.map(part => ({
+                ...part,
+                remainingQuantity: part.quantity
+            }));
+            
+            console.log('Parts to cut (with remaining quantities):', partsToCut);
+            
+            // Sort by length (largest first) for better cutting efficiency
+            partsToCut.sort((a, b) => b.length - a.length);
+            console.log('Sorted parts to cut:', partsToCut);
+            
+            let pieceCount = 0;
             for (const item of purchasedItems) {
+                console.log(`Processing item: ${item.originalLength} ${item.originalUnit} × ${item.quantity}`);
                 for (let i = 0; i < item.quantity; i++) {
+                    pieceCount++;
                     const piece = {
                         length: item.length,
+                        originalLength: item.originalLength,
+                        originalUnit: item.originalUnit,
                         price: item.price,
                         cuts: [],
                         remaining: item.length,
                         waste: 0
                     };
                     
-                    let pieceIndex = 0;
-                    while (pieceIndex < partsToCut.length && piece.remaining > 0) {
-                        const part = partsToCut[pieceIndex];
+                    console.log(`Processing piece ${pieceCount}: ${piece.originalLength} ${piece.originalUnit}`);
+                    
+                    // Try to fit parts into this piece
+                    for (let partIndex = 0; partIndex < partsToCut.length; partIndex++) {
+                        const part = partsToCut[partIndex];
                         
-                        if (part.quantity > 0 && part.length <= piece.remaining) {
-                            const maxFits = Math.min(part.quantity, Math.floor(piece.remaining / part.length));
+                        // Skip if no more of this part needed
+                        if (part.remainingQuantity <= 0) {
+                            continue;
+                        }
+                        
+                        // Skip if part is too long for remaining space
+                        if (part.length > piece.remaining) {
+                            continue;
+                        }
+                        
+                        // Calculate how many of this part can fit
+                        const maxFits = Math.min(
+                            part.remainingQuantity, 
+                            Math.floor(piece.remaining / part.length)
+                        );
                             
                             if (maxFits > 0) {
+                            console.log(`  Adding ${maxFits} × ${formatLength(part.length)} to piece ${pieceCount}`);
+                            
+                            // Add the cuts
                                 piece.cuts.push({
                                     length: part.length,
                                     quantity: maxFits,
-                                    description: `${part.length} ft × ${maxFits}`
+                                description: `${formatLength(part.length)}`
                                 });
                                 
+                            // Update remaining space and quantity
                                 piece.remaining -= part.length * maxFits;
-                                partsToCut[pieceIndex].quantity -= maxFits;
-                                
-                                if (partsToCut[pieceIndex].quantity === 0) {
-                                    partsToCut.splice(pieceIndex, 1);
-                                } else {
-                                    pieceIndex++;
-                                }
-                            } else {
-                                pieceIndex++;
-                            }
-                        } else {
-                            pieceIndex++;
+                            part.remainingQuantity -= maxFits;
+                            
+                            console.log(`  Piece ${pieceCount} remaining: ${formatLength(piece.remaining)}`);
+                            console.log(`  Part ${formatLength(part.length)} remaining quantity: ${part.remainingQuantity}`);
                         }
                     }
                     
+                    // Calculate waste
                     piece.waste = piece.remaining;
+                    console.log(`Piece ${pieceCount} final waste: ${formatLength(piece.waste)}`);
                     cuttingPlan.push(piece);
                 }
             }
             
+            console.log('Cutting plan completed. Total pieces:', cuttingPlan.length);
+            console.log('Final parts remaining:', partsToCut.map(p => `${formatLength(p.length)}: ${p.remainingQuantity}`));
+            
             return cuttingPlan;
         }
 
-        function displayResults(result, totalNeeded) {
+        function validateCuttingPlan(cuttingPlan, requiredParts) {
+            console.log('=== Validating Cutting Plan ===');
+            console.log('Cutting plan pieces:', cuttingPlan.length);
+            console.log('Required parts:', requiredParts);
+            
+            const totalCuts = {};
+            
+            // Count all cuts made
+            cuttingPlan.forEach((piece, pieceIndex) => {
+                piece.cuts.forEach(cut => {
+                    if (!totalCuts[cut.length]) {
+                        totalCuts[cut.length] = 0;
+                    }
+                    totalCuts[cut.length] += cut.quantity;
+                });
+            });
+            
+            console.log('Total cuts made:', totalCuts);
+            
+            // Check against required parts
+            const missingParts = [];
+            const fulfilledParts = [];
+            
+            requiredParts.forEach(part => {
+                const made = totalCuts[part.length] || 0;
+                console.log(`Part ${formatLength(part.length)}: required ${part.quantity}, made ${made}`);
+                
+                if (made < part.quantity) {
+                    const missing = part.quantity - made;
+                    console.log(`  MISSING: ${missing} pieces`);
+                    missingParts.push({
+                        ...part,
+                        made: made,
+                        missing: missing
+                    });
+                } else {
+                    console.log(`  FULFILLED: ${made} pieces`);
+                    fulfilledParts.push({
+                        ...part,
+                        made: made
+                    });
+                }
+            });
+            
+            const result = {
+                totalCuts,
+                missingParts,
+                fulfilledParts,
+                allPartsFulfilled: missingParts.length === 0
+            };
+            
+            console.log('Validation result:', result);
+            return result;
+        }
+
+        function displayResults(result, totalNeeded, invalidParts = [], maxLength = 0) {
             const resultsDiv = document.getElementById('results');
             
             if (!result.combination || result.combination.length === 0) {
@@ -609,17 +1301,78 @@
                 return;
             }
             
-            const excess = result.totalPurchased - totalNeeded;
-            const excessPercentage = ((excess / totalNeeded) * 100).toFixed(1);
-            const cuttingPlan = createCuttingPlan(result.combination, parts);
+            const { validParts } = validateParts();
+            const cuttingPlan = createCuttingPlan(result.combination, validParts);
+            const validation = validateCuttingPlan(cuttingPlan, validParts);
             
-            resultsDiv.innerHTML = `
+            // Calculate actual excess based on cutting plan
+            const actualMaterialUsed = cuttingPlan.reduce((sum, piece) => {
+                const used = piece.length - piece.waste;
+                return sum + used;
+            }, 0);
+            const totalWaste = cuttingPlan.reduce((sum, piece) => sum + piece.waste, 0);
+            const excess = result.totalPurchased - actualMaterialUsed;
+            const excessPercentage = actualMaterialUsed > 0 ? ((excess / actualMaterialUsed) * 100).toFixed(1) : '0';
+            
+            console.log('Material calculation:');
+            console.log('Total purchased:', result.totalPurchased);
+            console.log('Actual material used:', actualMaterialUsed);
+            console.log('Total waste:', totalWaste);
+            console.log('Excess (purchased - used):', excess);
+            
+            let warningHtml = '';
+            if (invalidParts.length > 0) {
+                warningHtml = `
+                    <div class="result-card warning-card">
+                        <div class="result-title" style="color: #ff6b6b;">⚠️ Parts That Cannot Be Made</div>
+                        <div style="color: #ffffff; margin-bottom: 15px;">
+                            The following parts exceed the maximum available length of ${formatLength(maxLength)} and have been excluded from calculations:
+                        </div>
+                        <div class="cost-breakdown">
+                            ${invalidParts.map(part => `
+                                <div class="cost-item" style="background: rgba(255, 107, 107, 0.2); border: 1px solid rgba(255, 107, 107, 0.3);">
+                                    <span>${formatLength(part.length)} × ${part.quantity} = ${formatLength(part.length * part.quantity)} total</span>
+                                    <span style="color: #ff6b6b; font-weight: bold;">Cannot be made</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="color: #ff6b6b; font-size: 0.9em; margin-top: 10px; font-style: italic;">
+                            Consider adding longer purchasing options or breaking these parts into smaller pieces.
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Add warning for missing parts in cutting plan
+            if (!validation.allPartsFulfilled) {
+                warningHtml += `
+                    <div class="result-card warning-card">
+                        <div class="result-title" style="color: #ff6b6b;">⚠️ Incomplete Cutting Plan</div>
+                        <div style="color: #ffffff; margin-bottom: 15px;">
+                            The cutting plan could not fulfill all required parts. Some parts are missing:
+                        </div>
+                        <div class="cost-breakdown">
+                            ${validation.missingParts.map(part => `
+                                <div class="cost-item" style="background: rgba(255, 107, 107, 0.2); border: 1px solid rgba(255, 107, 107, 0.3);">
+                                    <span>${formatLength(part.length)}: ${part.made} made, ${part.missing} missing</span>
+                                    <span style="color: #ff6b6b; font-weight: bold;">Incomplete</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="color: #ff6b6b; font-size: 0.9em; margin-top: 10px; font-style: italic;">
+                            This may indicate an issue with the optimization algorithm. Please check your inputs and try again.
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = warningHtml + `
                 <div class="result-card">
                     <div class="result-title">Optimal Purchase Plan</div>
                     <div class="cost-breakdown">
                         ${result.combination.map(item => `
                             <div class="cost-item">
-                                <span>${item.length} ft × ${item.quantity}</span>
+                                <span>${formatLength(item.length)} × ${item.quantity}</span>
                                 <span>$${(item.price * item.quantity).toFixed(2)}</span>
                             </div>
                         `).join('')}
@@ -632,7 +1385,7 @@
                     ${cuttingPlan.map((piece, index) => `
                         <div class="cutting-piece">
                             <div class="piece-header">
-                                <strong>Piece ${index + 1}:</strong> ${piece.length} ft ($${piece.price.toFixed(2)})
+                                <strong>Piece ${index + 1}:</strong> ${formatLength(piece.length)} ($${piece.price.toFixed(2)})
                             </div>
                             <div class="piece-visual">
                                 ${createPieceVisual(piece)}
@@ -640,12 +1393,16 @@
                             <div class="piece-details">
                                 ${piece.cuts.length > 0 ? `
                                     <div class="cuts-list">
-                                        ${piece.cuts.map(cut => `
-                                            <span class="cut-item">${cut.description}</span>
-                                        `).join('')}
+                                        ${piece.cuts.map(cut => {
+                                            let cuts = [];
+                                            for (let i = 0; i < cut.quantity; i++) {
+                                                cuts.push(`<span class="cut-item">${cut.description}</span>`);
+                                            }
+                                            return cuts.join('');
+                                        }).join('')}
                                     </div>
                                 ` : '<span class="no-cuts">No cuts - use as scrap</span>'}
-                                ${piece.waste > 0 ? `<div class="waste-info">Waste: ${piece.waste.toFixed(1)} ft</div>` : ''}
+                                ${piece.waste > 0 ? `<div class="waste-info">Waste: ${formatLength(piece.waste)}</div>` : ''}
                             </div>
                         </div>
                     `).join('')}
@@ -656,20 +1413,43 @@
                     <div class="cost-breakdown">
                         <div class="cost-item">
                             <span>Total Needed:</span>
-                            <span>${totalNeeded.toFixed(1)} ft</span>
+                            <span>${formatLength(totalNeeded)}</span>
                         </div>
                         <div class="cost-item">
                             <span>Total Purchased:</span>
-                            <span>${result.totalPurchased.toFixed(1)} ft</span>
+                            <span>${formatLength(result.totalPurchased)}</span>
                         </div>
                         <div class="cost-item">
                             <span>Excess Material:</span>
-                            <span>${excess.toFixed(1)} ft</span>
+                            <span>${formatLength(excess)}</span>
                         </div>
                     </div>
                     <div class="excess-info">
-                        <strong>Excess: ${excess.toFixed(1)} ft (${excessPercentage}%)</strong><br>
+                        <strong>Excess: ${formatLength(excess)} (${excessPercentage}%)</strong><br>
                         This excess can be used for future projects or sold as scrap.
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-title">Parts Fulfillment Summary</div>
+                    <div class="cost-breakdown">
+                        ${validation.fulfilledParts.map(part => `
+                            <div class="cost-item" style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3);">
+                                <span>${formatLength(part.length)}: ${part.made}/${part.quantity} made</span>
+                                <span style="color: #00ff88; font-weight: bold;">✓ Complete</span>
+                            </div>
+                        `).join('')}
+                        ${validation.missingParts.map(part => `
+                            <div class="cost-item" style="background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3);">
+                                <span>${formatLength(part.length)}: ${part.made}/${part.quantity} made</span>
+                                <span style="color: #ff6b6b; font-weight: bold;">✗ Incomplete</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="excess-info">
+                        <strong>Total Parts: ${validation.fulfilledParts.length + validation.missingParts.length} | 
+                        Fulfilled: ${validation.fulfilledParts.length} | 
+                        Missing: ${validation.missingParts.length}</strong>
                     </div>
                 </div>
                 
@@ -679,25 +1459,31 @@
             `;
             
             createChart(result, totalNeeded, excess);
+            
+            // Show export button
+            document.getElementById('exportPdfBtn').style.display = 'inline-block';
         }
 
         function createPieceVisual(piece) {
             if (piece.cuts.length === 0) {
-                return `<div class="visual-bar unused">${piece.length} ft (unused)</div>`;
+                return `<div class="visual-bar unused">${formatLength(piece.length)} (unused)</div>`;
             }
             
             let visual = '<div class="visual-bar">';
             let currentPos = 0;
             
+            // Create individual cut segments
             piece.cuts.forEach(cut => {
-                const width = (cut.length * cut.quantity / piece.length) * 100;
-                visual += `<div class="cut-segment" style="width: ${width}%">${cut.description}</div>`;
-                currentPos += cut.length * cut.quantity;
+                for (let i = 0; i < cut.quantity; i++) {
+                    const width = (cut.length / piece.length) * 100;
+                    const cutLength = formatLength(cut.length);
+                    visual += `<div class="cut-segment" style="width: ${width}%; border-right: 2px solid #1a1a1a;">${cutLength}</div>`;
+                }
             });
             
             if (piece.waste > 0) {
                 const wasteWidth = (piece.waste / piece.length) * 100;
-                visual += `<div class="waste-segment" style="width: ${wasteWidth}%">${piece.waste.toFixed(1)} ft waste</div>`;
+                visual += `<div class="waste-segment" style="width: ${wasteWidth}%">${formatLength(piece.waste)} waste</div>`;
             }
             
             visual += '</div>';
@@ -713,9 +1499,11 @@
                     labels: ['Used Material', 'Excess Material'],
                     datasets: [{
                         data: [totalNeeded, excess],
-                        backgroundColor: ['#3498db', '#e74c3c'],
+                        backgroundColor: ['#00d9ff', '#ff6b6b'],
                         borderWidth: 2,
-                        borderColor: '#1a1a1a'
+                        borderColor: '#1a1a1a',
+                        hoverBackgroundColor: ['#00b8e6', '#ff5252'],
+                        hoverBorderColor: '#00d9ff'
                     }]
                 },
                 options: {
@@ -739,6 +1527,302 @@
                     }
                 }
             });
+        }
+
+        // Add smooth animations for form interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show/hide debug console based on URL
+            toggleDebugConsole();
+            
+            // Add event listener for output unit changes
+            const outputUnitSelect = document.getElementById('outputUnit');
+            if (outputUnitSelect) {
+                outputUnitSelect.addEventListener('change', function() {
+                    // Recalculate and display results if they exist
+                    if (parts.length > 0 && options.length > 0) {
+                        const { validParts, invalidParts, maxLength } = validateParts();
+                        if (validParts.length > 0) {
+                            const totalNeeded = validParts.reduce((sum, part) => sum + (part.length * part.quantity), 0);
+                            const result = findOptimalCombination(totalNeeded, options, validParts);
+                            displayResults(result, totalNeeded, invalidParts, maxLength);
+                        }
+                    }
+                });
+            }
+            // Animate form elements on focus
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'translateY(-2px)';
+                    this.parentElement.style.transition = 'transform 0.3s ease';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Animate buttons on hover
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.02)';
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add loading animation to calculate button
+            const calculateBtn = document.querySelector('.btn-calculate');
+            if (calculateBtn) {
+                calculateBtn.addEventListener('click', function() {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<span class="loading"></span> Calculating...';
+                    this.disabled = true;
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    }, 2000);
+                });
+            }
+
+            // Animate result cards when they appear
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList') {
+                        const resultCards = document.querySelectorAll('.result-card');
+                        resultCards.forEach((card, index) => {
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(20px)';
+                            
+                            setTimeout(() => {
+                                card.style.transition = 'all 0.5s ease';
+                                card.style.opacity = '1';
+                                card.style.transform = 'translateY(0)';
+                            }, index * 100);
+                        });
+                    }
+                });
+            });
+
+            const resultsDiv = document.getElementById('results');
+            if (resultsDiv) {
+                observer.observe(resultsDiv, { childList: true, subtree: true });
+            }
+        });
+
+        async function exportToPDF() {
+            const exportBtn = document.getElementById('exportPdfBtn');
+            const originalText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<span class="loading"></span> Generating PDF...';
+            exportBtn.disabled = true;
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+            
+            // Set up fonts and colors
+            doc.setFont('helvetica');
+            doc.setTextColor(0, 0, 0);
+            
+            let yPosition = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+            const margin = 20;
+            const contentWidth = pageWidth - (margin * 2);
+            
+            // Title
+            doc.setFontSize(24);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Linear Metal Part Optimizer - Results', margin, yPosition);
+            yPosition += 20;
+            
+            // Date
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, margin, yPosition);
+            yPosition += 25;
+            
+            // Get current results data
+            const resultsDiv = document.getElementById('results');
+            const resultCards = resultsDiv.querySelectorAll('.result-card');
+            
+            for (let cardIndex = 0; cardIndex < resultCards.length; cardIndex++) {
+                const card = resultCards[cardIndex];
+                
+                // Check if we need a new page
+                if (yPosition > pageHeight - 100) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                const title = card.querySelector('.result-title');
+                if (title) {
+                    // Section title with better spacing
+                    doc.setFontSize(18);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(title.textContent, margin, yPosition);
+                    yPosition += 20;
+                    
+                    // Cost breakdown with better spacing
+                    const costItems = card.querySelectorAll('.cost-item');
+                    if (costItems.length > 0) {
+                        doc.setFontSize(12);
+                        doc.setFont('helvetica', 'normal');
+                        costItems.forEach(item => {
+                            const spans = item.querySelectorAll('span');
+                            if (spans.length >= 2) {
+                                doc.text(spans[0].textContent, margin, yPosition);
+                                doc.text(spans[1].textContent, pageWidth - margin - 60, yPosition);
+                                yPosition += 8;
+                            }
+                        });
+                        yPosition += 10;
+                    }
+                    
+                    // Total cost with better spacing
+                    const totalCost = card.querySelector('.total-cost');
+                    if (totalCost) {
+                        doc.setFontSize(16);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(totalCost.textContent, margin, yPosition);
+                        yPosition += 20;
+                    }
+                    
+                    // Excess info with better spacing
+                    const excessInfo = card.querySelector('.excess-info');
+                    if (excessInfo) {
+                        doc.setFontSize(11);
+                        doc.setFont('helvetica', 'normal');
+                        const lines = excessInfo.textContent.split('\n');
+                        lines.forEach(line => {
+                            if (line.trim()) {
+                                doc.text(line.trim(), margin, yPosition);
+                                yPosition += 8;
+                            }
+                        });
+                        yPosition += 15;
+                    }
+                    
+                    // Export cutting plan visualizations
+                    const cuttingPieces = card.querySelectorAll('.cutting-piece');
+                    if (cuttingPieces.length > 0) {
+                        doc.setFontSize(16);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text('Cutting Plan Visualizations:', margin, yPosition);
+                        yPosition += 15;
+                        
+                        for (let pieceIndex = 0; pieceIndex < cuttingPieces.length; pieceIndex++) {
+                            const piece = cuttingPieces[pieceIndex];
+                            
+                            // Check if we need a new page for this piece
+                            if (yPosition > pageHeight - 150) {
+                                doc.addPage();
+                                yPosition = 20;
+                            }
+                            
+                            const pieceHeader = piece.querySelector('.piece-header');
+                            if (pieceHeader) {
+                                // Piece header
+                                doc.setFontSize(14);
+                                doc.setFont('helvetica', 'bold');
+                                doc.text(pieceHeader.textContent, margin, yPosition);
+                                yPosition += 12;
+                                
+                                // Capture the visual bar
+                                const visualBar = piece.querySelector('.visual-bar');
+                                if (visualBar) {
+                                    try {
+                                        const canvas = await html2canvas(visualBar, {
+                                            backgroundColor: '#1a1a1a',
+                                            scale: 2,
+                                            width: visualBar.offsetWidth,
+                                            height: visualBar.offsetHeight
+                                        });
+                                        
+                                        const imgData = canvas.toDataURL('image/png');
+                                        const imgWidth = Math.min(contentWidth, 120);
+                                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                                        
+                                        doc.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
+                                        yPosition += imgHeight + 10;
+                                    } catch (error) {
+                                        console.log('Could not capture visual bar:', error);
+                                        yPosition += 20;
+                                    }
+                                }
+                                
+                                // Cut details
+                                const cutsList = piece.querySelector('.cuts-list');
+                                if (cutsList) {
+                                    doc.setFontSize(11);
+                                    doc.setFont('helvetica', 'normal');
+                                    const cutItems = cutsList.querySelectorAll('.cut-item');
+                                    let cutText = 'Individual Cuts: ';
+                                    cutItems.forEach((cut, cutIndex) => {
+                                        cutText += cut.textContent;
+                                        if (cutIndex < cutItems.length - 1) cutText += ', ';
+                                    });
+                                    doc.text(cutText, margin, yPosition);
+                                    yPosition += 8;
+                                }
+                                
+                                // Waste info
+                                const wasteInfo = piece.querySelector('.waste-info');
+                                if (wasteInfo) {
+                                    doc.text(wasteInfo.textContent, margin, yPosition);
+                                    yPosition += 8;
+                                }
+                                
+                                yPosition += 15;
+                            }
+                        }
+                    }
+                    
+                    yPosition += 20;
+                }
+            }
+            
+            // Export the chart if it exists
+            const chartCanvas = document.getElementById('resultsChart');
+            if (chartCanvas) {
+                // Check if we need a new page for the chart
+                if (yPosition > pageHeight - 200) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                try {
+                    doc.setFontSize(16);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Material Usage Chart:', margin, yPosition);
+                    yPosition += 20;
+                    
+                    const chartImgData = chartCanvas.toDataURL('image/png');
+                    const chartWidth = Math.min(contentWidth, 150);
+                    const chartHeight = (chartCanvas.height * chartWidth) / chartCanvas.width;
+                    
+                    doc.addImage(chartImgData, 'PNG', margin, yPosition, chartWidth, chartHeight);
+                } catch (error) {
+                    console.log('Could not capture chart:', error);
+                }
+            }
+            
+                // Save the PDF
+                const fileName = `metal-optimizer-results-${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try again.');
+            } finally {
+                // Reset button
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+            }
         }
     </script>
 </body>
