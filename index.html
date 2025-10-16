@@ -1016,94 +1016,66 @@
                 remainingQuantity: part.quantity
             }));
             
-            // Process each material option, starting with the most cost-effective
-            for (const option of sortedOptions) {
-                console.log(`Processing material: ${option.originalLength} ${option.originalUnit}`);
+            // For each part type, find the most cost-effective material to make it
+            for (const part of remainingParts) {
+                if (part.remainingQuantity <= 0) continue;
                 
-                // Find parts that can be made by this material
-                const canMakeParts = remainingParts.filter(part => 
-                    part.remainingQuantity > 0 && part.length <= option.length
-                );
+                console.log(`\nFinding best material for ${part.originalLength} ${part.originalUnit} (${part.remainingQuantity} needed)`);
                 
-                if (canMakeParts.length === 0) {
-                    console.log('No parts can be made with this material');
-                    continue;
-                }
+                let bestOption = null;
+                let bestCost = Infinity;
+                let bestPiecesNeeded = 0;
                 
-                console.log('Parts that can be made:', canMakeParts);
-                
-                // Calculate how many pieces we need for each part type
-                const piecesNeeded = [];
-                for (const part of canMakeParts) {
-                    const partsPerPiece = Math.floor(option.length / part.length);
-                    const piecesForThisPart = Math.ceil(part.remainingQuantity / partsPerPiece);
-                    piecesNeeded.push(piecesForThisPart);
-                }
-                
-                // Use the maximum pieces needed (to ensure all parts can be made)
-                const maxPiecesNeeded = Math.max(...piecesNeeded);
-                
-                if (maxPiecesNeeded > 0) {
-                    console.log(`Need ${maxPiecesNeeded} pieces of ${option.originalLength} ${option.originalUnit}`);
-                    
-                    // Calculate total cost for this material
-                    const costForThisMaterial = maxPiecesNeeded * option.price;
-                    console.log(`Cost for this material: $${costForThisMaterial}`);
-                    
-                    // Check if this is the most cost-effective option for these parts
-                    let isMostCostEffective = true;
-                    let bestAlternativeCost = Infinity;
-                    
-                    for (const otherOption of sortedOptions) {
-                        if (otherOption.length < option.length) {
-                            // Check if the other option can make all these parts
-                            const canOtherMakeAll = canMakeParts.every(part => part.length <= otherOption.length);
-                            
-                            if (canOtherMakeAll) {
-                                // Calculate cost with the other option
-                                const otherPiecesNeeded = [];
-                                for (const part of canMakeParts) {
-                                    const partsPerPiece = Math.floor(otherOption.length / part.length);
-                                    const piecesForThisPart = Math.ceil(part.remainingQuantity / partsPerPiece);
-                                    otherPiecesNeeded.push(piecesForThisPart);
-                                }
-                                const otherMaxPieces = Math.max(...otherPiecesNeeded);
-                                const otherCost = otherMaxPieces * otherOption.price;
-                                
-                                console.log(`Alternative ${otherOption.originalLength} ${otherOption.originalUnit}: ${otherMaxPieces} pieces = $${otherCost}`);
-                                
-                                if (otherCost < costForThisMaterial) {
-                                    isMostCostEffective = false;
-                                    bestAlternativeCost = Math.min(bestAlternativeCost, otherCost);
-                                }
-                            }
+                // Check all material options that can make this part
+                for (const option of sortedOptions) {
+                    if (part.length <= option.length) {
+                        const partsPerPiece = Math.floor(option.length / part.length);
+                        const piecesNeeded = Math.ceil(part.remainingQuantity / partsPerPiece);
+                        const totalCostForThisPart = piecesNeeded * option.price;
+                        
+                        console.log(`${option.originalLength} ${option.originalUnit}: ${piecesNeeded} pieces × $${option.price} = $${totalCostForThisPart} (${partsPerPiece} parts per piece)`);
+                        
+                        if (totalCostForThisPart < bestCost) {
+                            bestCost = totalCostForThisPart;
+                            bestOption = option;
+                            bestPiecesNeeded = piecesNeeded;
+                            console.log(`  → New best option!`);
                         }
                     }
+                }
+                
+                if (bestOption) {
+                    console.log(`Best option: ${bestOption.originalLength} ${bestOption.originalUnit} - $${bestCost}`);
                     
-                    if (isMostCostEffective) {
-                        console.log(`Using ${option.originalLength} ${option.originalUnit} - most cost-effective`);
-                        
-                        combination.push({
-                            ...option,
-                            quantity: maxPiecesNeeded
-                        });
-                        
-                        totalCost += costForThisMaterial;
-                        
-                        // Update remaining quantities
-                        for (const part of canMakeParts) {
-                            const partsPerPiece = Math.floor(option.length / part.length);
-                            const totalPartsMade = maxPiecesNeeded * partsPerPiece;
-                            part.remainingQuantity = Math.max(0, part.remainingQuantity - totalPartsMade);
-                            console.log(`Part ${part.originalLength} ${part.originalUnit}: made ${totalPartsMade}, remaining ${part.remainingQuantity}`);
-                        }
+                    // Add to combination (or update existing quantity)
+                    const existingIndex = combination.findIndex(item => 
+                        item.length === bestOption.length && item.price === bestOption.price
+                    );
+                    
+                    if (existingIndex >= 0) {
+                        combination[existingIndex].quantity += bestPiecesNeeded;
+                        console.log(`Added ${bestPiecesNeeded} pieces to existing ${bestOption.originalLength} ${bestOption.originalUnit} entry`);
                     } else {
-                        console.log(`Skipping ${option.originalLength} ${option.originalUnit} - not most cost-effective (best alternative: $${bestAlternativeCost})`);
+                        combination.push({
+                            ...bestOption,
+                            quantity: bestPiecesNeeded
+                        });
+                        console.log(`Added new entry: ${bestPiecesNeeded} × ${bestOption.originalLength} ${bestOption.originalUnit}`);
                     }
+                    
+                    totalCost += bestCost;
+                    
+                    // Update remaining quantity
+                    const partsPerPiece = Math.floor(bestOption.length / part.length);
+                    const totalPartsMade = bestPiecesNeeded * partsPerPiece;
+                    part.remainingQuantity = Math.max(0, part.remainingQuantity - totalPartsMade);
+                    console.log(`Made ${totalPartsMade} parts, ${part.remainingQuantity} remaining`);
+                } else {
+                    console.log(`ERROR: No material can make ${part.originalLength} ${part.originalUnit} parts!`);
                 }
             }
             
-            console.log('Smart combination:', combination);
+            console.log('\nSmart combination:', combination);
             console.log('Total cost:', totalCost);
             
             return {
